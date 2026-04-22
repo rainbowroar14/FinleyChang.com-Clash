@@ -7,7 +7,23 @@
     <link rel="stylesheet" href="css/styles.css" />
     <script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore-compat.js"></script>
-    <script src="js/firebase-config.js"></script>
+    <!-- Inlined so GitHub Pages always initializes Firebase even if js/firebase-config.js is missing from deploy -->
+    <script>
+      (function () {
+        "use strict";
+        if (typeof firebase === "undefined") return;
+        if (firebase.apps.length) return;
+        firebase.initializeApp({
+          apiKey: "AIzaSyCzaBxqEjoyGJshtCV_ZwiAwFHF4BgFzik",
+          authDomain: "clash-b15e4.firebaseapp.com",
+          projectId: "clash-b15e4",
+          storageBucket: "clash-b15e4.firebasestorage.app",
+          messagingSenderId: "717206514659",
+          appId: "1:717206514659:web:a4e8b42cc046597c434ed6",
+          measurementId: "G-T4MQ0P1Q0J",
+        });
+      })();
+    </script>
   </head>
   <body>
     <div id="screen-menu" class="screen">

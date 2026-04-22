@@ -1,11 +1,8 @@
 /**
- * Copy this file to firebase-config.js (same folder) and replace the placeholder
- * object with your Firebase project's web app config (Console → Project settings → Your apps).
+ * Optional: copy to firebase-config.js for local dev. Production (GitHub Pages) also inlines
+ * the same config in index.html so Battle works with a single deployed file.
  *
- * firebase-config.js is gitignored so keys stay local.
- *
- * Firebase is a platform: Firestore stores and syncs documents (queue + match metadata here).
- * You can add Auth, Cloud Functions, etc. later — not limited to "just storage."
+ * Firebase Console → Project settings → Your apps → Web app config.
  */
 (function () {
   "use strict";
