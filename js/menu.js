@@ -58,4 +58,84 @@
   const screenQueue = $("screen-queue");
   const screenGame = $("screen-game");
   const queueStatus = $("queue-status");
-  const btnTraining =
+  const btnTraining = $("btn-training");
+  const btnBattle = $("btn-battle");
+  const btnQueueCancel = $("btn-queue-cancel");
+  const btnBackMenu = $("btn-back-menu");
+
+  /** @type {(() => Promise<void>) | null} */
+  let cancelQueue = null;
+
+  function showScreen(which) {
+    screenMenu.classList.toggle("is-hidden", which !== "menu");
+    screenQueue.classList.toggle("is-hidden", which !== "queue");
+    screenGame.classList.toggle("is-hidden", which !== "game");
+  }
+
+  function goMenu() {
+    window.NightArena.stop();
+    if (cancelQueue) {
+      cancelQueue();
+      cancelQueue = null;
+    }
+    showScreen("menu");
+  }
+
+  btnTraining.addEventListener("click", () => {
+    if (cancelQueue) {
+      cancelQueue();
+      cancelQueue = null;
+    }
+    showScreen("game");
+    window.NightArena.start({ mode: "training" });
+  });
+
+  btnBattle.addEventListener("click", async () => {
+    const ok = await ensureFirebaseReady();
+    if (!ok) {
+      queueStatus.textContent =
+        typeof firebase === "undefined"
+          ? "Firebase scripts blocked or failed to load. Turn off strict ad/shield blocking for this site, check network, then refresh."
+          : "Firebase didn’t start. Push the latest js/menu.js + index.html from the project, hard-refresh. (Not a Firestore rules issue — rules only affect data after connect.)";
+      showScreen("queue");
+      return;
+    }
+    showScreen("queue");
+    queueStatus.textContent = "Joining queue…";
+    try {
+      cancelQueue = await window.NightArenaMatchmaking.joinBattleQueue(
+        (info) => {
+          showScreen("game");
+          window.NightArena.start({
+            mode: "battle",
+            matchId: info.matchId,
+            guestId: info.guestId,
+          });
+          if (cancelQueue) {
+            void cancelQueue();
+            cancelQueue = null;
+          }
+        },
+        (status) => {
+          queueStatus.textContent = status;
+        },
+      );
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      queueStatus.textContent = msg;
+    }
+  });
+
+  btnQueueCancel.addEventListener("click", () => {
+    goMenu();
+  });
+
+  btnBackMenu.addEventListener("click", () => {
+    goMenu();
+  });
+
+  // Init as soon as this script runs (after Firebase SDK in <head>) so Battle never depends on an old cached click path.
+  tryInitializeFirebase();
+
+  showScreen("menu");
+})();
