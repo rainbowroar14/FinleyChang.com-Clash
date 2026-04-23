@@ -74,6 +74,97 @@
   /** @type {(() => Promise<void>) | null} */
   let cancelQueue = null;
 
+  const DECK_STORAGE_KEY = "na_deck_v1";
+
+  /** @param {typeof window.NightArena} na */
+  function loadSavedDeck(na) {
+    if (!na || typeof na.getDefaultDeck !== "function") return null;
+    try {
+      const raw = localStorage.getItem(DECK_STORAGE_KEY);
+      if (raw) {
+        const d = JSON.parse(raw);
+        if (na.validateDeck(d)) return /** @type {string[]} */ (d.slice());
+      }
+    } catch {
+      /* ignore */
+    }
+    return na.getDefaultDeck();
+  }
+
+  function initDeckBuilder() {
+    const na = window.NightArena;
+    if (!na || typeof na.getCardPreview !== "function") return;
+
+    const row = document.getElementById("deck-slots-row");
+    const pool = document.getElementById("deck-pool-grid");
+    const btnDef = document.getElementById("btn-deck-default");
+    if (!row || !pool || !btnDef) return;
+
+    /** @type {(string | null)[]} */
+    let deckSlots = loadSavedDeck(na).slice();
+    while (deckSlots.length < 8) deckSlots.push(null);
+    if (deckSlots.length > 8) deckSlots = deckSlots.slice(0, 8);
+
+    function saveIfComplete() {
+      if (deckSlots.every(Boolean) && na.validateDeck(/** @type {string[]} */ (deckSlots))) {
+        localStorage.setItem(DECK_STORAGE_KEY, JSON.stringify(deckSlots));
+      }
+    }
+
+    function renderDeckUi() {
+      row.innerHTML = "";
+      for (let i = 0; i < 8; i++) {
+        const id = deckSlots[i];
+        const b = document.createElement("button");
+        b.type = "button";
+        b.className = "deck-slot-btn" + (id ? " is-filled" : "");
+        if (id) {
+          const ui = na.getCardPreview(id);
+          b.innerHTML = `<img src="${ui.img}" alt="" width="40" height="40" /><span class="deck-slot-cost">${ui.cost}</span>`;
+          b.title = `${ui.name} — remove`;
+          b.addEventListener("click", () => {
+            deckSlots[i] = null;
+            renderDeckUi();
+            saveIfComplete();
+          });
+        } else {
+          b.innerHTML = "<span>—</span>";
+          b.title = "Empty slot";
+          b.disabled = true;
+        }
+        row.appendChild(b);
+      }
+
+      pool.innerHTML = "";
+      const allFull = deckSlots.every((x) => x);
+      for (const id of na.CARD_POOL) {
+        const used = deckSlots.includes(id);
+        const ui = na.getCardPreview(id);
+        const b = document.createElement("button");
+        b.type = "button";
+        b.className = "deck-pool-card";
+        b.innerHTML = `<img src="${ui.img}" alt="" width="36" height="36" /><span>${ui.name}</span><span class="cost">${ui.cost}</span>`;
+        b.disabled = used || allFull;
+        b.addEventListener("click", () => {
+          const empty = deckSlots.indexOf(null);
+          if (empty === -1) return;
+          deckSlots[empty] = id;
+          renderDeckUi();
+          saveIfComplete();
+        });
+        pool.appendChild(b);
+      }
+    }
+
+    btnDef.addEventListener("click", () => {
+      deckSlots = na.getDefaultDeck().slice();
+      renderDeckUi();
+      saveIfComplete();
+    });
+
+    renderDeckUi();
+  }
+
   function wireMenu() {
     const screenMenu = $("screen-menu");
     const screenQueue = $("screen-queue");
@@ -105,7 +196,9 @@
         cancelQueue = null;
       }
       showScreenInner("game");
-      safeStartArena({ mode: "training" });
+      const na = window.NightArena;
+      const deck = na && loadSavedDeck(na);
+      safeStartArena({ mode: "training", deck: deck || undefined });
     });
 
     btnBattle.addEventListener("click", async () => {
@@ -124,10 +217,13 @@
         cancelQueue = await window.NightArenaMatchmaking.joinBattleQueue(
           (info) => {
             showScreenInner("game");
+            const na = window.NightArena;
+            const deck = na && loadSavedDeck(na);
             safeStartArena({
               mode: "battle",
               matchId: info.matchId,
               guestId: info.guestId,
+              deck: deck || undefined,
             });
             if (cancelQueue) {
               void cancelQueue();
@@ -153,6 +249,7 @@
     });
 
     tryInitializeFirebase();
+    initDeckBuilder();
     showScreenInner("menu");
   }
 

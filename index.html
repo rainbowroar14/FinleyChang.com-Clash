@@ -42,6 +42,16 @@
             <strong>Training</strong> is offline vs AI. <strong>Battle</strong> joins a live queue; when two players
             are waiting, you are paired and a match id is written to Firestore (shared troop sync can build on that).
           </p>
+          <div class="deck-builder" id="deck-builder">
+            <h2>Your deck (8 cards)</h2>
+            <p class="deck-builder-hint">
+              Tap cards below to fill slots left to right. Tap a slot to remove. Needs all 8 filled — saved in your browser for Training &amp; Battle.
+            </p>
+            <div class="deck-slots-row" id="deck-slots-row" aria-label="Deck slots"></div>
+            <div class="deck-pool-label">Collection</div>
+            <div class="deck-pool-grid" id="deck-pool-grid"></div>
+            <button type="button" class="btn" id="btn-deck-default">Reset to default deck</button>
+          </div>
           <div class="menu-actions">
             <button type="button" class="btn btn-primary" id="btn-training">Training</button>
             <button type="button" class="btn btn-primary" id="btn-battle">Battle</button>
@@ -72,6 +82,16 @@
       <div class="app">
         <div class="game-toolbar">
           <button type="button" class="btn" id="btn-back-menu">← Main menu</button>
+        </div>
+        <div class="testing-panel" id="testing-panel" hidden>
+          <span class="testing-panel-title">Training sandbox</span>
+          <label class="testing-label"
+            ><input type="checkbox" id="testing-enemy-spawns" checked /> Enemy AI deploys</label
+          >
+          <label class="testing-label"
+            ><input type="checkbox" id="testing-infinite-elixir" /> Infinite elixir (you)</label
+          >
+          <button type="button" class="btn btn-small" id="testing-kill-all">Kill all units</button>
         </div>
         <div class="emote-bar" id="emote-bar" style="display: none" aria-label="Quick emotes">
           <span class="emote-label">Emotes</span>
@@ -144,7 +164,7 @@
     </div>
 
     <!-- ?v= bumps cache after deploy; open /js/menu.js in browser and search FIREBASE_WEB_CONFIG to verify live file -->
-    <script src="js/game.js?v=20260501" defer></script>
+    <script src="js/game.js?v=20260422u" defer></script>
     <script src="js/matchmaking.js?v=20260428" defer></script>
     <script src="js/menu.js?v=20260428" defer></script>
   </body>

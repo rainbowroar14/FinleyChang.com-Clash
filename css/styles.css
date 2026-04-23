@@ -48,6 +48,47 @@ body {
   max-width: 52ch;
 }
 
+
+.testing-panel {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.65rem 1rem;
+  margin: 0 0 1rem;
+  padding: 0.65rem 0.85rem;
+  border-radius: 10px;
+  background: rgba(30, 41, 59, 0.75);
+  border: 1px solid rgba(100, 116, 139, 0.45);
+  font-size: 0.82rem;
+}
+
+.testing-panel[hidden] {
+  display: none !important;
+}
+
+.testing-panel-title {
+  font-weight: 700;
+  color: var(--gold);
+  margin-right: 0.25rem;
+}
+
+.testing-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  cursor: pointer;
+  color: var(--muted);
+}
+
+.testing-label input {
+  accent-color: var(--accent);
+}
+
+.btn-small {
+  padding: 0.35rem 0.65rem;
+  font-size: 0.8rem;
+}
+
 .arena-wrap {
   position: relative;
 }
@@ -387,7 +428,10 @@ body {
 .game-toolbar {
   margin-bottom: 0.75rem;
   display: flex;
+  flex-wrap: wrap;
+  align-items: center;
   justify-content: flex-end;
+  gap: 0.5rem 1rem;
 }
 
 .emote-bar {
@@ -424,4 +468,116 @@ body {
 .btn-emote:focus-visible {
   outline: 2px solid var(--elixir);
   outline-offset: 2px;
+}
+
+.deck-builder {
+  margin: 1.25rem 0 1.5rem;
+  padding: 1rem 1.1rem;
+  background: var(--panel);
+  border: 1px solid rgba(80, 100, 140, 0.35);
+  border-radius: 12px;
+}
+
+.deck-builder h2 {
+  margin: 0 0 0.35rem;
+  font-size: 1.1rem;
+}
+
+.deck-builder-hint {
+  margin: 0 0 0.85rem;
+  font-size: 0.82rem;
+  color: var(--muted);
+  line-height: 1.45;
+}
+
+.deck-slots-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  margin-bottom: 1rem;
+  min-height: 56px;
+}
+
+.deck-slot-btn {
+  appearance: none;
+  width: 52px;
+  height: 56px;
+  padding: 0.2rem;
+  border-radius: 10px;
+  border: 2px dashed var(--card-border);
+  background: rgba(15, 23, 42, 0.6);
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.1rem;
+  color: var(--muted);
+  font-size: 0.65rem;
+}
+
+.deck-slot-btn.is-filled {
+  border-style: solid;
+  border-color: var(--elixir-deep);
+  background: var(--card);
+}
+
+.deck-slot-btn.is-filled:hover {
+  border-color: #f87171;
+}
+
+.deck-slot-btn .deck-slot-cost {
+  font-weight: 700;
+  color: var(--elixir);
+}
+
+.deck-pool-label {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--muted);
+  margin-bottom: 0.45rem;
+}
+
+.deck-pool-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.deck-pool-card {
+  appearance: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.15rem;
+  width: 76px;
+  padding: 0.35rem 0.25rem;
+  border-radius: 10px;
+  border: 1px solid var(--card-border);
+  background: var(--card);
+  color: var(--text);
+  cursor: pointer;
+  font-size: 0.62rem;
+  line-height: 1.2;
+  text-align: center;
+}
+
+.deck-pool-card:hover:not(:disabled) {
+  border-color: var(--elixir);
+}
+
+.deck-pool-card:disabled {
+  opacity: 0.38;
+  cursor: not-allowed;
+}
+
+.deck-pool-card .cost {
+  color: var(--elixir);
+  font-weight: 700;
+}
+
+#btn-deck-default {
+  font-size: 0.85rem;
 }
