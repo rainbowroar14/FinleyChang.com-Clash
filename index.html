@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Night Arena</title>
+    <link rel="stylesheet" href="css/styles.css" />
+    <script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore-compat.js"></script>
+    <!-- Inlined so GitHub Pages always initializes Firebase even if js/firebase-config.js is missing from deploy -->
+    <script>
+      (function () {
+        "use strict";
+        if (typeof firebase === "undefined") return;
+        if (firebase.apps.length) return;
+        firebase.initializeApp({
+          apiKey: "AIzaSyCzaBxqEjoyGJshtCV_ZwiAwFHF4BgFzik",
+          authDomain: "clash-b15e4.firebaseapp.com",
+          projectId: "clash-b15e4",
+          storageBucket: "clash-b15e4.firebasestorage.app",
+          messagingSenderId: "717206514659",
+          appId: "1:717206514659:web:a4e8b42cc046597c434ed6",
+          measurementId: "G-T4MQ0P1Q0J",
+        });
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="screen-menu" class="screen">
+      <div class="app">
+        <header class="header">
+          <h1>Night Arena</h1>
+          <p class="tagline">
+            <strong>4</strong> cards in hand from an <strong>8-card</strong> cycling deck; <strong>Arrows</strong> (3 elixir) deal
+            <strong>150</strong> damage anywhere on the arena. Training vs AI or Battle online.
+          </p>
+        </header>
+
+        <div class="menu-panel">
+          <h2>Play</h2>
+          <p>
+            <strong>Training</strong> is offline vs AI. <strong>Battle</strong> joins a live queue; when two players
+            are waiting, you are paired and a match id is written to Firestore (shared troop sync can build on that).
+          </p>
+          <div class="menu-actions">
+            <button type="button" class="btn btn-primary" id="btn-training">Training</button>
+            <button type="button" class="btn btn-primary" id="btn-battle">Battle</button>
+          </div>
+          <p class="firebase-blurb">
+            <strong>About Firebase:</strong> it is not only a file dump. This project uses
+            <strong>Cloud Firestore</strong> — a document database that syncs in real time — for the queue and match
+            records. The same Firebase project can later add Auth, Cloud Functions, etc.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div id="screen-queue" class="screen is-hidden">
+      <div class="app">
+        <header class="header">
+          <h1>Battle queue</h1>
+          <p class="tagline">Looking for another player…</p>
+        </header>
+        <div class="queue-panel">
+          <p class="queue-status" id="queue-status">Connecting…</p>
+          <button type="button" class="btn" id="btn-queue-cancel">Cancel</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="screen-game" class="screen is-hidden">
+      <div class="app">
+        <div class="game-toolbar">
+          <button type="button" class="btn" id="btn-back-menu">← Main menu</button>
+        </div>
+        <div class="emote-bar" id="emote-bar" style="display: none" aria-label="Quick emotes">
+          <span class="emote-label">Emotes</span>
+          <button type="button" class="btn-emote" data-emoji="👍" title="Thumbs up">👍</button>
+          <button type="button" class="btn-emote" data-emoji="😀" title="Happy">😀</button>
+          <button type="button" class="btn-emote" data-emoji="😢" title="Sad">😢</button>
+          <button type="button" class="btn-emote" data-emoji="🔥" title="Fire">🔥</button>
+          <button type="button" class="btn-emote" data-emoji="💀" title="Skull">💀</button>
+        </div>
+        <header class="header">
+          <h1>Night Arena</h1>
+          <p class="tagline">
+            <strong>4</strong> hand cards, <strong>8-card</strong> cycle (see <strong>Next</strong>). <strong>Arrows</strong>: 3 elixir, 150 damage in a circle, cast anywhere.
+            Princess towers <strong>2000</strong> HP, king <strong>4000</strong> HP; king shots <strong>24</strong> dmg.
+          </p>
+        </header>
+
+        <div class="arena-wrap">
+          <canvas id="arena" width="800" height="560" aria-label="Game arena"></canvas>
+          <p class="deploy-hint" id="deploy-hint">
+            Select a card, then tap your side of the arena to deploy.
+          </p>
+        </div>
+
+        <div class="hand" id="hand">
+          <div class="elixir-block">
+            <div class="elixir-label">Elixir</div>
+            <div class="elixir-bar" role="progressbar" aria-valuemin="0" aria-valuemax="10">
+              <div class="elixir-fill" id="elixir-fill"></div>
+            </div>
+            <div class="elixir-num" id="elixir-num">0.0</div>
+          </div>
+          <div class="deck-next-wrap" id="deck-next-wrap" aria-label="Next card in deck">
+            <div class="deck-next-label">Next</div>
+            <div class="deck-next-preview">
+              <img id="deck-next-img" src="assets/mini-pekka-w0.svg" alt="" width="36" height="36" />
+              <span id="deck-next-name" class="deck-next-name">—</span>
+              <span id="deck-next-cost" class="deck-next-cost">0</span>
+            </div>
+          </div>
+          <div class="cards" role="group" aria-label="Your hand (4 cards)">
+            <button type="button" class="card card-slot" data-slot="0" id="card-slot-0">
+              <img src="" alt="" width="40" height="40" />
+              <span class="card-name">—</span>
+              <span class="card-cost">0</span>
+            </button>
+            <button type="button" class="card card-slot" data-slot="1" id="card-slot-1">
+              <img src="" alt="" width="40" height="40" />
+              <span class="card-name">—</span>
+              <span class="card-cost">0</span>
+            </button>
+            <button type="button" class="card card-slot" data-slot="2" id="card-slot-2">
+              <img src="" alt="" width="40" height="40" />
+              <span class="card-name">—</span>
+              <span class="card-cost">0</span>
+            </button>
+            <button type="button" class="card card-slot" data-slot="3" id="card-slot-3">
+              <img src="" alt="" width="40" height="40" />
+              <span class="card-name">—</span>
+              <span class="card-cost">0</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="hud" id="hud" aria-live="polite"></div>
+        <footer class="footer">
+          <button type="button" class="btn" id="btn-reset">Reset match</button>
+        </footer>
+      </div>
+    </div>
+
+    <!-- ?v= bumps cache after deploy; open /js/menu.js in browser and search FIREBASE_WEB_CONFIG to verify live file -->
+    <script src="js/game.js?v=20260501" defer></script>
+    <script src="js/matchmaking.js?v=20260428" defer></script>
+    <script src="js/menu.js?v=20260428" defer></script>
+  </body>
+</html>
