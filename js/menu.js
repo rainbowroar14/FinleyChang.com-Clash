@@ -4,6 +4,7 @@
 (function () {
   "use strict";
 
+<<<<<<< HEAD
   function safeStopArena() {
     if (window.NightArena && typeof window.NightArena.stop === "function") {
       window.NightArena.stop();
@@ -21,6 +22,8 @@
     return true;
   }
 
+=======
+>>>>>>> 052e1780f8cae08c22a44cb4fb46a159fb3b7f2f
   /** Same object as index.html / js/firebase-config.js — duplicated so Battle works if those didn’t run (e.g. old deploy, 404). */
   const FIREBASE_WEB_CONFIG = {
     apiKey: "AIzaSyCzaBxqEjoyGJshtCV_ZwiAwFHF4BgFzik",
@@ -76,9 +79,42 @@
 
   const DECK_STORAGE_KEY = "na_deck_v1";
 
+<<<<<<< HEAD
   /** @param {typeof window.NightArena} na */
   function loadSavedDeck(na) {
     if (!na || typeof na.getDefaultDeck !== "function") return null;
+=======
+  function goMenu() {
+    window.NightArena.stop();
+    if (cancelQueue) {
+      cancelQueue();
+      cancelQueue = null;
+    }
+    showScreen("menu");
+  }
+
+  btnTraining.addEventListener("click", () => {
+    if (cancelQueue) {
+      cancelQueue();
+      cancelQueue = null;
+    }
+    showScreen("game");
+    window.NightArena.start({ mode: "training" });
+  });
+
+  btnBattle.addEventListener("click", async () => {
+    const ok = await ensureFirebaseReady();
+    if (!ok) {
+      queueStatus.textContent =
+        typeof firebase === "undefined"
+          ? "Firebase scripts blocked or failed to load. Turn off strict ad/shield blocking for this site, check network, then refresh."
+          : "Firebase didn’t start. Push the latest js/menu.js + index.html from the project, hard-refresh. (Not a Firestore rules issue — rules only affect data after connect.)";
+      showScreen("queue");
+      return;
+    }
+    showScreen("queue");
+    queueStatus.textContent = "Joining queue…";
+>>>>>>> 052e1780f8cae08c22a44cb4fb46a159fb3b7f2f
     try {
       const raw = localStorage.getItem(DECK_STORAGE_KEY);
       if (raw) {
@@ -264,9 +300,24 @@
     }
   }
 
+<<<<<<< HEAD
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", boot);
   } else {
     boot();
   }
+=======
+  btnQueueCancel.addEventListener("click", () => {
+    goMenu();
+  });
+
+  btnBackMenu.addEventListener("click", () => {
+    goMenu();
+  });
+
+  // Init as soon as this script runs (after Firebase SDK in <head>) so Battle never depends on an old cached click path.
+  tryInitializeFirebase();
+
+  showScreen("menu");
+>>>>>>> 052e1780f8cae08c22a44cb4fb46a159fb3b7f2f
 })();
